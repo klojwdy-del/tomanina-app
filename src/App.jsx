@@ -1,94 +1,24 @@
 import React, { useState, useEffect } from 'react';
 
 function App() {
-  // --- 1. إدارة الحالات البرمجية (State Management) ---
   const [activeTab, setActiveTab] = useState('home');
   const [theme, setTheme] = useState('light');
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [vibrationEnabled, setVibrationEnabled] = useState(true);
-  const [fontSize, setFontSize] = useState('medium');
-  const [hideName, setHideName] = useState(false);
-  const [selectedSurah, setSelectedSurah] = useState(0);
+  const [fontSize, setFontSize] = useState('large');
+  const [seerahSection, setSeerahSection] = useState('lineage'); // القسم الافتراضي للسيرة
 
-  // عدادات الصفحة الرئيسية والسبحة
+  // عدادات الذكر والسبحة
   const [counters, setCounters] = useState(() => {
     const saved = localStorage.getItem('tomanina_counters');
     return saved ? JSON.parse(saved) : { tasbeeh: 0, salawat: 0, istighfar: 0, takbeer: 0, tahmeed: 0, tahleel: 0 };
   });
-
-  const [selectedDhikr, setSelectedDhikr] = useState('tasbeeh');
   const [historyTotal, setHistoryTotal] = useState(() => Number(localStorage.getItem('tomanina_total')) || 0);
-  const [weeklyChallengeProgress, setWeeklyChallengeProgress] = useState(() => Number(localStorage.getItem('tomanina_challenge')) || 0);
 
-  // حفظ البيانات تلقائياً عند تغير العدادات
   useEffect(() => {
     localStorage.setItem('tomanina_counters', JSON.stringify(counters));
     const total = Object.values(counters).reduce((a, b) => a + b, 0);
     setHistoryTotal(total);
-    localStorage.setItem('tomanina_total', total.toString());
   }, [counters]);
 
-  const triggerVibration = () => {
-    if (vibrationEnabled && navigator.vibrate) {
-      navigator.vibrate(50);
-    }
-  };
-
-  const incrementCounter = (type) => {
-    setCounters(prev => ({ ...prev, [type]: prev[type] + 1 }));
-    if (type === 'salawat' || type === selectedDhikr) {
-      setWeeklyChallengeProgress(prev => {
-        const next = prev + 1;
-        localStorage.setItem('tomanina_challenge', next.toString());
-        return next;
-      });
-    }
-    triggerVibration();
-  };
-
-  const resetCounter = (type) => {
-    setCounters(prev => ({ ...prev, [type]: 0 }));
-    triggerVibration();
-  };
-
-  const dhikrNames = {
-    tasbeeh: 'سبحان الله',
-    salawat: 'اللهم صلِّ وسلم على نبينا محمد',
-    istighfar: 'أستغفر الله وأتوب إليه',
-    takbeer: 'الله أكبر',
-    tahmeed: 'الحمد لله',
-    tahleel: 'لا إله إلا الله'
-  };
-
-  // بيانات القرآن الكريم (سور وآيات عظيمة الفضل ومكتوبة بالرسم المريح)
-  const quranData = [
-    {
-      title: "📖 سورة الفاتحة",
-      verses: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ﴿١﴾ الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ ﴿٢﴾ الرَّحْمَٰنِ الرَّحِيمِ ﴿٣﴾ مَالِكِ يَوْمِ الدِّينِ ﴿٤﴾ إِيَّاكَ نَعْبُدُ وإِيَّاكَ نَسْتَعِينُ ﴿٥﴾ اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ ﴿٦﴾ صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ ﴿٧﴾"
-    },
-    {
-      title: "✨ آية الكرسي",
-      verses: "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ"
-    },
-    {
-      title: "🛡️ خواتيم سورة البقرة",
-      verses: "آمَنَ الرَّسُولُ بِمَا أُنزِلَ إِلَيْهِ مِن رَّبِّهِ وَالْمُؤْمِنُونَ ۚ كُلٌّ آمَنَ بِاللَّهِ وَمَلَائِكَتِهِ وَكُتُبِهِ وَرُسُلِهِ لَا نُفَرِّقُ بَيْنَ أَحَدٍ مِّن رُّسُلِهِ ۚ وَقَالُوا سَمِعْنَا وَأَطَعْنَا ۖ غُفْرَانَكَ رَبَّنَا وَإِلَيْهِ الْمَصِيرُ ﴿٢٨٥﴾ لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا ۚ لَهَا مَا كَسَبَتْ وَعَلَيْهَا مَا اكْتَسَبَتْ ۗ رَبَّنَا لَا تُؤَاخِذْنَا إِن نَّسِينَا أَوْ أَخْطَأْنَا ۚ رَبَّنَا وَلَا تَحْمِلْ عَلَيْنَا إِصْرًا كَمَا حَمَلْتَهُ عَلَى الَّذِينَ مِن قَبْلِنَا ۚ رَبَّنَا وَلَا تُحَمِّلْنَا مَا لَا طَاقَةَ لَنَا بِهِ ۖ وَاعْفُ عَنَّا وَاغْفِرْ لَنَا وَارْحَمْنَا ۚ أَنتَ مَوْلَانَا فَانصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ ﴿٢٨٦﴾"
-    },
-    {
-      title: "🕌 سورة الكهف (الأوائل)",
-      verses: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ الْحَمْدُ لِلَّهِ الَّذِي أَنزَلَ عَلَىٰ عَبْدِهِ الْكِتَابَ وَلَمْ يَجْعَل لَّهُ عِوَجًا ۜ ﴿١﴾ قَيِّمًا لِّيُنذِرَ بَأْسًا شَدِيدًا مِّن لَّدُنْهُ وَيُبَشِّرَ الْمُؤْمِنِينَ الَّذِينَ يَعْمَلُونَ الصَّالِحَاتِ أَنَّ لَهُمْ أَجْرًا حَسَنًا ﴿٢﴾ مَّاكِثِينَ فِيهِ أَبَدًا ﴿٣﴾ وَيُنذِرَ الَّذِينَ قَالُوا اتَّخَذَ اللَّهُ وَلَدًا ﴿٤﴾ مَّا لَهُم بِهِ مِنْ عِلْمٍ وَلَا لِآبَائِهِمْ ۚ كَبُرَتْ كَلِمَةً تَخْرُjsُ مِنْ أَفْوَاهِهِمْ ۚ إِن يَقُولُونَ إِلَّا كَذِبًا ﴿٥﴾"
-    },
-    {
-      title: "🌌 سورة الملك (مختارات)",
-      verses: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ تَبَارَك الَّذِي بِيَدِهِ الْمُلْكُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ ﴿١﴾ الَّذِي خَلَقَ الْمَوْتَ وَالْحَيَاةَ لِيَبْلُوَكُمْ أَيُّكُمْ أَحْسَنُ عَمَلاً وَهُوَ الْعَزِيزُ الْغَفُورُ ﴿٢﴾ الَّذِي خَلَقَ سَبْعَ سَمَاوَاتٍ طِبَاقاً مَّا تَرَى فِي خَلْقِ الرَّحْمَنِ مِن تَفَاوُتٍ فَارْجِعِ الْبَصَرَ هَلْ تَرَى مِن فُطُورٍ ﴿٣﴾"
-    },
-    {
-      title: "📿 سورة الإخلاص والمعوذتين",
-      verses: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ قُلْ هُوَ اللَّهُ أَحَدٌ ﴿١﴾ اللَّهُ الصَّمَدُ ﴿٢﴾ لَمْ يَلِدْ وَلَمْ يُولَدْ ﴿٣﴾ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ ﴿٤﴾ \n\n قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ﴿١﴾ مِن شَرِّ مَا خَلَقَ ﴿٢﴾ وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبُ ﴿٣﴾ وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ﴿٤﴾ وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ ﴿٥﴾ \n\n قُلْ أَعُوذُ بِرَبِّ النَّاسِ ﴿١﴾ مَلِكِ النَّاسِ ﴿٢﴾ إِلَٰهِ النَّاسِ ﴿٣﴾ مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ﴿٤﴾ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ﴿٥﴾ مِنَ الْجِنَّةِ وَالنَّاسِ ﴿٦﴾"
-    }
-  ];
-
-  // --- 2. نظام الألوان والتصميم (Theme Styles) ---
   const isDark = theme === 'dark';
   const colors = {
     bg: isDark ? '#121b15' : '#f4f7f5',
@@ -101,326 +31,150 @@ function App() {
     border: isDark ? '#25352b' : '#e2e8e4'
   };
 
-  const getFontSize = (base) => {
-    if (fontSize === 'small') return `${base * 0.85}rem`;
-    if (fontSize === 'large') return `${base * 1.3}rem`;
-    return `${base}rem`;
-  };
-
   const styles = {
-    app: {
-      backgroundColor: colors.bg,
-      color: colors.text,
-      minHeight: '100vh',
-      fontFamily: "'Tajawal', 'Cairo', system-ui, -apple-system, sans-serif",
-      direction: 'rtl',
-      paddingBottom: '95px',
-      transition: 'all 0.3s ease'
-    },
-    header: {
-      backgroundColor: colors.primary,
-      color: colors.white,
-      padding: '20px',
-      textAlign: 'center',
-      borderBottom: `4px solid ${colors.gold}`,
-      boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
-    },
+    app: { backgroundColor: colors.bg, color: colors.text, minHeight: '100vh', fontFamily: "'Tajawal', sans-serif", direction: 'rtl', paddingBottom: '95px' },
+    header: { backgroundColor: colors.primary, color: colors.white, padding: '20px', textAlign: 'center', borderBottom: `4px solid ${colors.gold}` },
     container: { maxWidth: '500px', margin: '0 auto', padding: '15px' },
-    card: {
-      backgroundColor: colors.cardBg,
-      borderRadius: '16px',
-      padding: '20px',
-      marginBottom: '15px',
-      border: `1px solid ${colors.border}`,
-      boxShadow: '0 4px 6px rgba(0,0,0,0.02)'
-    },
-    grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '15px' },
-    counterBox: {
-      backgroundColor: colors.cardBg,
-      border: `1px solid ${colors.border}`,
-      borderRadius: '12px',
-      padding: '15px',
-      textAlign: 'center'
-    },
-    btnPrimary: {
-      backgroundColor: colors.primary,
-      color: colors.white,
-      border: 'none',
-      padding: '12px 24px',
-      borderRadius: '25px',
-      fontSize: getFontSize(1.1),
+    card: { backgroundColor: colors.cardBg, borderRadius: '16px', padding: '20px', marginBottom: '15px', border: `1px solid ${colors.border}` },
+    tabButton: (active) => ({
+      flex: 1,
+      padding: '10px 5px',
+      borderRadius: '8px',
+      border: `1px solid ${colors.primary}`,
+      backgroundColor: active ? colors.primary : colors.cardBg,
+      color: active ? colors.white : colors.primary,
       cursor: 'pointer',
+      fontFamily: 'inherit',
       fontWeight: '700',
-      width: '100%',
-      fontFamily: "inherit",
-      boxShadow: `0 4px 12px rgba(27,77,62,0.2)`
-    },
-    navBar: {
-      position: 'fixed',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      backgroundColor: colors.cardBg,
-      display: 'flex',
-      justifyContent: 'space-around',
-      padding: '12px 0',
-      borderTop: `1px solid ${colors.border}`,
-      boxShadow: '0 -4px 10px rgba(0,0,0,0.05)',
-      zIndex: 1000
-    },
-    navItem: (tab) => ({
-      background: 'none',
-      border: 'none',
-      color: activeTab === tab ? colors.primary : colors.subText,
-      fontWeight: activeTab === tab ? '700' : '500',
-      cursor: 'pointer',
-      fontSize: '0.85rem',
-      fontFamily: "inherit",
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '2px'
-    })
+      fontSize: '0.9rem',
+      transition: 'all 0.2s ease'
+    }),
+    infoBlock: {
+      padding: '12px',
+      borderBottom: `1px solid ${colors.border}`,
+      lineHeight: '1.8'
+    }
   };
 
   return (
     <div style={styles.app}>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
-      <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet" />
-
       <header style={styles.header}>
         <h1 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '900' }}>🕌 طُمأنينة</h1>
-        <p style={{ margin: '5px 0 0 0', opacity: 0.8, fontSize: '0.85rem', fontWeight: '500' }}>مسبحتك الإلكترونية وأذكارك اليومية</p>
       </header>
 
       <div style={styles.container}>
         
-        {/* --- 1. الصفحة الرئيسية --- */}
+        {/* الصفحة الرئيسية */}
         {activeTab === 'home' && (
           <div>
             <div style={{ ...styles.card, textAlign: 'center', background: `linear-gradient(135deg, ${colors.primary}, #2c6b57)`, color: colors.white }}>
-              <h2 style={{ margin: '0 0 10px 0', fontWeight: '700' }}>مجموع أذكارك اليومية</h2>
+              <h2 style={{ margin: '0 0 10px 0' }}>مجموع أذكارك اليومية</h2>
               <div style={{ fontSize: '3.5rem', fontWeight: '900', color: colors.gold }}>{historyTotal}</div>
-              <button style={{ ...styles.btnPrimary, backgroundColor: colors.gold, color: colors.primary, marginTop: '15px' }} onClick={() => setActiveTab('tasbeeh')}>
-                ✨ ابدأ الذكر الآن
+              <button 
+                onClick={() => setActiveTab('seerah')}
+                style={{ backgroundColor: colors.gold, color: colors.primary, border: 'none', padding: '10px 20px', borderRadius: '20px', marginTop: '15px', cursor: 'pointer', fontWeight: '700', fontFamily: 'inherit' }}
+              >
+                ✨ تصفح سيرة الحبيب ﷺ
               </button>
             </div>
+            <div style={{ textAlign: 'center', marginTop: '30px', color: colors.subText }}>
+              <p style={{ fontWeight: '700', color: colors.text }}>منشئ التطبيق: محمد حمدان</p>
+            </div>
+          </div>
+        )}
 
-            <h3 style={{ color: colors.primary, marginBottom: '12px', fontWeight: '700' }}>📊 عدادات الأذكار السريعة</h3>
-            <div style={styles.grid}>
-              {Object.keys(counters).map((key) => (
-                <div key={key} style={styles.counterBox}>
-                  <div style={{ fontSize: getFontSize(0.95), color: colors.subText, marginBottom: '8px', fontWeight: '500', minHeight: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{dhikrNames[key]}</div>
-                  <div style={{ fontSize: '2rem', fontWeight: '900', color: colors.primary, marginBottom: '10px' }}>{counters[key]}</div>
-                  <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-                    <button style={{ background: 'none', border: 'none', color: colors.primary, cursor: 'pointer', fontWeight: '700', fontSize: '1rem', fontFamily: 'inherit' }} onClick={() => incrementCounter(key)}>انقر</button>
-                    <button style={{ background: 'none', border: 'none', color: '#d9534f', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'inherit' }} onClick={() => resetCounter(key)}>تصفير</button>
+        {/* 📚 خانة السيرة النبوية الشريفة المضافة حديثاً */}
+        {activeTab === 'seerah' && (
+          <div>
+            <div style={styles.card}>
+              <h2 style={{ color: colors.primary, marginTop: 0, textAlign: 'center', fontSize: '1.4rem' }}>🌸 السيرة النبوية العطرة</h2>
+              <p style={{ textAlign: 'center', fontSize: '0.9rem', color: colors.subText, marginBottom: '15px' }}>تعرّف على نبيك وحبيبه المصطفى ﷺ</p>
+              
+              {/* أزرار التنقل الداخلية بين أقسام السيرة */}
+              <div style={{ display: 'flex', gap: '5px', marginBottom: '10px' }}>
+                <button style={styles.tabButton(seerahSection === 'lineage')} onClick={() => setSeerahSection('lineage')}>الاسم والنسب</button>
+                <button style={styles.tabButton(seerahSection === 'family')} onClick={() => setSeerahSection('family')}>عائلته وآل بيته</button>
+                <button style={styles.tabButton(seerahSection === 'companions')} onClick={() => setSeerahSection('companions')}>أصحابه الكرام</button>
+              </div>
+            </div>
+
+            {/* عرض البيانات بناءً على القسم المختار */}
+            <div style={{ ...styles.card, backgroundImage: 'linear-gradient(to bottom, #fffdf9, #ffffff)' }}>
+              
+              {/* 1. قسم الاسم والنسب */}
+              {seerahSection === 'lineage' && (
+                <div>
+                  <h3 style={{ color: colors.gold, borderBottom: `2px solid ${colors.gold}`, paddingBottom: '5px' }}>📝 اسمه ونسبه الشريف</h3>
+                  <div style={styles.infoBlock}>
+                    <strong>الاسم الكامل:</strong> محمد بن عبد الله بن عبد المطلب بن هاشم بن عبد مناف بن قصي بن كلاب بن مرة بن كعب بن لؤي بن غالب بن فهر بن مالك بن النضر بن كنانة بن خزيمة بن مدركة بن إلياس بن مضر بن نزار بن معد بن عدنان. (وينتهي نسبه الشريف إلى النبي إسماعيل بن إبراهيم عليهما السلام).
+                  </div>
+                  <div style={styles.infoBlock}>
+                    <strong>كنيته:</strong> أبو القاسم (على اسم ابنه الأكبر).
+                  </div>
+                  <div style={styles.infoBlock}>
+                    <strong>ولادته:</strong> وُلِد في مكة المكرمة يوم الاثنين 12 ربيع الأول في عام الفيل (الموافق 571 ميلادي تقريباً)، ونشأ يتيماً الأب والأم.
                   </div>
                 </div>
-              ))}
-            </div>
-
-            <div style={{ textAlign: 'center', marginTop: '30px', padding: '15px', color: colors.subText, borderTop: `1px solid ${colors.border}` }}>
-              <p style={{ margin: '5px 0', fontWeight: '700', color: colors.text }}>منشئ التطبيق: محمد حمدان</p>
-              <p style={{ margin: '5px 0', fontSize: '0.85rem', fontWeight: '500' }}>نسأل الله أن يوفقه ويبارك له ويتقبل منه.</p>
-            </div>
-          </div>
-        )}
-
-        {/* --- 2. صفحة السبحة الإلكترونية --- */}
-        {activeTab === 'tasbeeh' && (
-          <div style={{ textAlign: 'center' }}>
-            <div style={styles.card}>
-              <label style={{ display: 'block', marginBottom: '10px', fontWeight: '700', color: colors.primary }}>اختر الذكر الحالي:</label>
-              <select 
-                value={selectedDhikr} 
-                onChange={(e) => setSelectedDhikr(e.target.value)}
-                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: `1px solid ${colors.border}`, backgroundColor: colors.cardBg, color: colors.text, fontFamily: 'inherit', fontWeight: '500', fontSize: '1rem' }}
-              >
-                {Object.keys(dhikrNames).map(key => <option key={key} value={key}>{dhikrNames[key]}</option>)}
-              </select>
-            </div>
-
-            <div style={{
-              width: '230px', height: '230px', borderRadius: '50%', backgroundColor: colors.cardBg,
-              margin: '40px auto', display: 'flex', flexDirection: 'column', justifyContent: 'center',
-              alignItems: 'center', border: `8px solid ${colors.primary}`, boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
-              cursor: 'pointer'
-            }} onClick={() => incrementCounter(selectedDhikr)}>
-              <span style={{ fontSize: getFontSize(1), color: colors.subText, fontWeight: '500', padding: '0 10px' }}>{dhikrNames[selectedDhikr]}</span>
-              <span style={{ fontSize: '3.8rem', fontWeight: '900', color: colors.primary, margin: '5px 0' }}>{counters[selectedDhikr]}</span>
-              <span style={{ fontSize: '0.85rem', color: colors.gold, fontWeight: '700' }}>اضغط للتسبيح</span>
-            </div>
-
-            <button style={{ ...styles.btnPrimary, backgroundColor: '#d9534f', maxWidth: '160px', borderRadius: '12px' }} onClick={() => resetCounter(selectedDhikr)}>
-              🔄 تصفير العداد
-            </button>
-          </div>
-        )}
-
-        {/* --- خانة القرآن الكريم المضافة حديثاً --- */}
-        {activeTab === 'quran' && (
-          <div>
-            <div style={styles.card}>
-              <h3 style={{ color: colors.primary, marginTop: 0, fontWeight: '700' }}>📖 المصحف الشريف (سور وآيات فاضلة)</h3>
-              <p style={{ fontSize: '0.85rem', color: colors.subText, marginBottom: '15px' }}>اختر السورة أو الآية للقراءة والتدبر اليومي:</p>
-              
-              <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '15px' }}>
-                {quranData.map((surah, idx) => (
-                  <button 
-                    key={idx}
-                    onClick={() => setSelectedSurah(idx)}
-                    style={{
-                      padding: '8px 16px', borderRadius: '20px', border: `1px solid ${selectedSurah === idx ? colors.primary : colors.border}`,
-                      backgroundColor: selectedSurah === idx ? colors.primary : colors.cardBg,
-                      color: selectedSurah === idx ? colors.white : colors.text,
-                      whiteSpace: 'nowrap', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600', fontSize: '0.9rem'
-                    }}
-                  >
-                    {surah.title}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ ...styles.card, textAlign: 'center', backgroundImage: 'linear-gradient(to bottom, #fffdf8, #ffffff)', border: `1px solid ${colors.gold}` }}>
-              <h3 style={{ color: colors.gold, marginTop: 0, borderBottom: `1px solid ${colors.border}`, paddingBottom: '10px' }}>
-                {quranData[selectedSurah].title}
-              </h3>
-              <p style={{ 
-                fontSize: getFontSize(1.35), 
-                lineHeight: '2.2', 
-                color: '#1a2520', 
-                fontWeight: '600',
-                textAlign: 'justify',
-                direction: 'rtl',
-                padding: '10px 5px',
-                whiteSpace: 'pre-line'
-              }}>
-                {quranData[selectedSurah].verses}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* --- 7. صفحة الأذكار --- */}
-        {activeTab === 'azkar' && (
-          <div>
-            {[
-              { t: "☀️ أذكار الصباح", c: "أعوذ بالله من الشيطان الرجيم (آية الكرسي)، أصبحنا وأصبح الملك لله والحمد لله ولا إله إلا الله." },
-              { t: "🌙 أذكار المساء", c: "أمسينَا وأمسى الملك لله، والحمد لله، رضيت بالله رباً وبالإسلام ديناً وبمحمد ﷺ نبياً." },
-              { t: "🛌 أذكار النوم", c: "باسمك ربي وضعت جنبي وبك أرفعه، إن أمسكت نفسي فارحمها وإن أرسلتها فاحفظها." },
-              { t: "🌅 أذكار الاستيقاظ", c: "الحمد لله الذي أحيانا بعد ما أماتنا وإليه النشور." },
-              { t: "📿 أذكار بعد الصلاة", c: "أستغفر الله (ثلاثاً)، اللهم أنت السلام ومنك السلام تباركت يا ذا الجلال والإكرام." },
-              { t: "✨ أذكار متنوعة", c: "سبحان الله وبحمده سبحان الله العظيم، لا حول ولا قوة إلا بالله العلي العظيم." }
-            ].map((zkr, i) => (
-              <div key={i} style={styles.card}>
-                <h4 style={{ color: colors.primary, margin: '0 0 10px 0', fontWeight: '700', fontSize: '1.1rem' }}>{zkr.t}</h4>
-                <p style={{ fontSize: getFontSize(1.1), lineHeight: '1.7', color: colors.text, fontWeight: '500' }}>{zkr.c}</p>
-                <button 
-                  style={{ background: 'none', border: 'none', color: colors.gold, cursor: 'pointer', fontWeight: '700', fontSize: '0.85rem', marginTop: '10px', fontFamily: 'inherit' }}
-                  onClick={() => { navigator.clipboard.writeText(zkr.c); alert('تم نسخ الذكر المبارك لمشاركته!'); }}
-                >
-                  🔗 نسخ ومشاركة الذكر
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* --- 4 & 5. نظام الإنجازات والتحديات --- */}
-        {activeTab === 'achievements' && (
-          <div>
-            <div style={{ ...styles.card, border: `2px solid ${colors.gold}`, background: `linear-gradient(to right, ${colors.cardBg}, #fffdf7)` }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3 style={{ color: colors.gold, margin: 0, fontWeight: '700' }}>🏆 التحدي الأسبوعي</h3>
-                <span style={{ fontSize: '1.5rem' }}>👑</span>
-              </div>
-              <p style={{ fontSize: '0.95rem', margin: '10px 0', fontWeight: '500' }}>قم بالإتيان بـ 100 ذكر أو صلاة على النبي ﷺ هذا الأسبوع.</p>
-              
-              <div style={{ width: '100%', backgroundColor: colors.border, height: '10px', borderRadius: '5px', overflow: 'hidden', margin: '10px 0' }}>
-                <div style={{ width: `${Math.min((weeklyChallengeProgress / 100) * 100, 100)}%`, backgroundColor: colors.primary, height: '100%' }}></div>
-              </div>
-              
-              {weeklyChallengeProgress >= 100 ? (
-                <div style={{ color: colors.primary, fontWeight: '700', fontSize: '0.95rem', backgroundColor: '#e8f5e9', padding: '10px', borderRadius: '8px', textAlign: 'center' }}>
-                  🎉 تهانينا! أكملت التحدي وحصلت على الكأس الذهبي الافتراضي وشارة الأسبوع النورانية بنجاح!
-                </div>
-              ) : (
-                <div style={{ fontSize: '0.85rem', color: colors.subText, textAlign: 'left', fontWeight: '500' }}>التقدم الحالي: {weeklyChallengeProgress} / 100</div>
               )}
-            </div>
 
-            <h3 style={{ color: colors.primary, fontWeight: '700' }}>🏅 الأوسمة والألقاب النورانية</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              {[
-                { t: "بداية الخير", d: "سبّحت أول تسبيحة لك", active: historyTotal > 0 },
-                { t: "المواظبة", d: "أتممت 50 ذكراً كلياً", active: historyTotal >= 50 },
-                { t: "عاشق النبي ﷺ", d: "صلّيت على النبي 33 مرة", active: counters.salawat >= 33 },
-                { t: "الذاكر", d: "أتممت 100 ذكر في التطبيق", active: historyTotal >= 100 },
-                { t: "أهل الاستغفار", d: "استغفرت الله 33 مرة", active: counters.istighfar >= 33 },
-                { t: "نور القلب", d: "سبّحت وهلّلت بكثرة اليوم", active: counters.tasbeeh >= 20 },
-                { t: "ختم 1,000 ذكر", d: "أكملت 1,000 ذكر كلياً", active: historyTotal >= 1000 },
-                { t: "ختم 10,000 ذكر", d: "أكملت 10,000 ذكر كلياً", active: historyTotal >= 10000 },
-                { t: "الاستمرار 30 يوماً", d: "حافظت على الأذكار شهراً", active: false }
-              ].map((badge, idx) => (
-                <div key={idx} style={{ ...styles.counterBox, opacity: badge.active ? 1 : 0.5, border: badge.active ? `2px solid ${colors.gold}` : `1px solid ${colors.border}` }}>
-                  <div style={{ fontSize: '2rem', marginBottom: '5px' }}>{badge.active ? '⭐' : '🔒'}</div>
-                  <div style={{ fontWeight: '700', color: colors.primary }}>وسام {badge.t}</div>
-                  <div style={{ fontSize: '0.8rem', color: colors.subText, marginTop: '4px', fontWeight: '500' }}>{badge.d}</div>
+              {/* 2. قسم العائلة وآل البيت */}
+              {seerahSection === 'family' && (
+                <div>
+                  <h3 style={{ color: colors.gold, borderBottom: `2px solid ${colors.gold}`, paddingBottom: '5px' }}>🏡 عائلته وآل بيته</h3>
+                  <div style={styles.infoBlock}>
+                    <strong>والداه:</strong> أبوه عبد الله بن عبد المطلب (توفي قبل ولادته)، وأمه آمنة بنت وهب (توفيت وعمره 6 سنوات). حضنته أم أيمن بركة الحبشية، وأرضعته حليمة السعدية.
+                  </div>
+                  <div style={styles.infoBlock}>
+                    <strong>زوجاته (أمهات المؤمنين):</strong> خديجة بنت خويلد (الأولى)، سودة بنت زمعة، عائشة بنت أبي بكر، حفصة بنت عمر، زينب بنت خزيمة، أم سلمة، زينب بنت جحش، جويرية بنت الحارث، صفية بنت حيي، أم حبيبة، وميمونة بنت الحارث رضي الله عنهن.
+                  </div>
+                  <div style={styles.infoBlock}>
+                    <strong>أولاده:</strong> له 7 أولاد (3 ذكور و4 إناث)، وكلهم من السيدة خديجة إلا إبراهيم فمن مارية القبطية:
+                    <ul>
+                      <li>الذكور: القاسم، عبد الله، إبراهيم (توفوا كلهم في صغرهم).</li>
+                      <li>الإناث: زينب، رقية، أم كلثوم، وفاطمة الزهراء (رضي الله عنهن جميعاً).</li>
+                    </ul>
+                  </div>
                 </div>
-              ))}
+              )}
+
+              {/* 3. قسم أصحابه الكرام */}
+              {seerahSection === 'companions' && (
+                <div>
+                  <h3 style={{ color: colors.gold, borderBottom: `2px solid ${colors.gold}`, paddingBottom: '5px' }}>⚔️ أصحابه الكرام (رضي الله عنهم)</h3>
+                  <div style={styles.infoBlock}>
+                    <strong>الخلفاء الراشدون:</strong> 
+                    <ul>
+                      <li>أبو بكر الصديق (صاحبه في الغجرة ورفيقه).</li>
+                      <li>عمر بن الخطاب (الفاروق).</li>
+                      <li>عثمان بن عفان (ذو النورين).</li>
+                      <li>علي بن أبي طالب (ابن عمه وصهره).</li>
+                    </ul>
+                  </div>
+                  <div style={styles.infoBlock}>
+                    <strong>المبشرون بالجنة:</strong> بالإضافة للخلفاء الأربعة: طلحة بن عبيد الله، الزبير بن العوام، عبد الرحمن بن عوف، سعد بن أبي وقاص، سعيد بن زيد، وأبو عبيدة عامر بن الجراح.
+                  </div>
+                  <div style={styles.infoBlock}>
+                    <strong>مكانتهم وعلاقتهم:</strong> هم الذين نصروه وآزروه ونقلوا لنا هذا الدين العظيم، وكان يقول فيهم ﷺ: "الله الله في أصحابي، لا تتخذوهم غرضاً بعدي، فمن أحبهم فبحبي أحبهم".
+                  </div>
+                </div>
+              )}
+
             </div>
           </div>
         )}
 
-        {/* --- 3. صفحة الإحصائيات ولوحة الصدارة دمجت للإعدادات --- */}
-        {activeTab === 'settings' && (
-          <div>
-            <div style={styles.card}>
-              <h3 style={{ color: colors.primary, marginTop: 0, fontWeight: '700' }}>⚙️ الإعدادات العامة</h3>
-              
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: `1px solid ${colors.border}`, fontWeight: '500' }}>
-                <span>الوضع الليلي (المظهر الداكن)</span>
-                <input type="checkbox" checked={isDark} onChange={() => setTheme(isDark ? 'light' : 'dark')} style={{ width: '20px', height: '20px' }} />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: `1px solid ${colors.border}`, fontWeight: '500' }}>
-                <span>تفعيل الاهتزاز اللطيف</span>
-                <input type="checkbox" checked={vibrationEnabled} onChange={() => setVibrationEnabled(!vibrationEnabled)} style={{ width: '20px', height: '20px' }} />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: `1px solid ${colors.border}`, fontWeight: '500' }}>
-                <span>حجم الخط العربي</span>
-                <select value={fontSize} onChange={(e) => setFontSize(e.target.value)} style={{ padding: '6px', borderRadius: '6px', fontFamily: 'inherit' }}>
-                  <option value="small">صغير</option>
-                  <option value="medium">متوسط</option>
-                  <option value="large">كبير</option>
-                </select>
-              </div>
-            </div>
-
-            <div style={styles.card}>
-              <h3 style={{ color: colors.primary, marginTop: 0, fontWeight: '700' }}>📊 إجمالي أذكارك</h3>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', fontWeight: '600' }}>
-                <span>المجموع الكلي الحالي:</span>
-                <span style={{ color: colors.gold, fontSize: '1.2rem' }}>{historyTotal} ذكر</span>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* باقي الصفحات الافتراضية */}
+        {activeTab === 'tasbeeh' && <div style={{textAlign:'center'}}><p>صفحة السبحة الإلكترونية</p></div>}
+        {activeTab === 'azkar' && <div><p>صفحة الأذكار اليومية</p></div>}
 
       </div>
 
-      {/* شريط التنقل السفلي المطور لتضمين خانة القرآن الكريم */}
-      <nav style={styles.navBar}>
-        <button style={styles.navItem('home')} onClick={() => setActiveTab('home')}><span>🏠</span>الرئيسية</button>
-        <button style={styles.navItem('tasbeeh')} onClick={() => setActiveTab('tasbeeh')}><span>📿</span>السبحة</button>
-        <button style={styles.navItem('quran')} onClick={() => setActiveTab('quran')}><span>📖</span>القرآن</button>
-        <button style={styles.navItem('azkar')} onClick={() => setActiveTab('azkar')}><span>✨</span>الأذكار</button>
-        <button style={styles.navItem('achievements')} onClick={() => setActiveTab('achievements')}><span>🏅</span>الأوسمة</button>
-        <button style={styles.navItem('settings')} onClick={() => setActiveTab('settings')}><span>⚙️</span>الإعدادات</button>
+      {/* شريط التنقل السفلي المعدل (القرآن استُبدل بالسيرة) */}
+      <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: colors.cardBg, display: 'flex', justifyContent: 'space-around', padding: '12px 0', borderTop: `1px solid ${colors.border}`, zIndex: 1000 }}>
+        <button style={{ background: 'none', border: 'none', color: activeTab === 'home' ? colors.primary : colors.subText, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'inherit' }} onClick={() => setActiveTab('home')}><span>🏠</span>الرئيسية</button>
+        <button style={{ background: 'none', border: 'none', color: activeTab === 'tasbeeh' ? colors.primary : colors.subText, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'inherit' }} onClick={() => setActiveTab('tasbeeh')}><span>📿</span>السبحة</button>
+        <button style={{ background: 'none', border: 'none', color: activeTab === 'seerah' ? colors.primary : colors.subText, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'inherit' }} onClick={() => setActiveTab('seerah')}><span>🌸</span>السيرة</button>
+        <button style={{ background: 'none', border: 'none', color: activeTab === 'azkar' ? colors.primary : colors.subText, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'inherit' }} onClick={() => setActiveTab('azkar')}><span>✨</span>الأذكار</button>
       </nav>
     </div>
   );
