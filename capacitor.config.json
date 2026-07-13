@@ -1,0 +1,6 @@
+{
+  "appId": "com.tomanina.app",
+  "appName": "tomanina-app",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
