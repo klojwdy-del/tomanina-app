@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 
 function App() {
   const [activeTab, setActiveTab] = useState('home');
-  const [theme, setTheme] = useState('light');
 
   // 1️⃣ إدارة العدادات وحفظها في الذاكرة المحلية (LocalStorage)
   const [counters, setCounters] = useState(() => {
@@ -35,16 +34,15 @@ function App() {
     }
   };
 
-  const isDark = theme === 'dark';
   const colors = {
-    bg: isDark ? '#121b15' : '#f4f7f5',
-    cardBg: isDark ? '#1a261f' : '#ffffff',
-    text: isDark ? '#e8ece9' : '#2c3e35',
-    subText: isDark ? '#92a399' : '#687c72',
+    bg: '#f4f7f5',
+    cardBg: '#ffffff',
+    text: '#2c3e35',
+    subText: '#687c72',
     primary: '#1b4d3e', 
     gold: '#c5a059',    
     white: '#ffffff',
-    border: isDark ? '#25352b' : '#e2e8e4'
+    border: '#e2e8e4'
   };
 
   const styles = {
@@ -56,14 +54,14 @@ function App() {
   };
 
   return (
-    <div style={styles.app}>
+    <div style={styles.app} data-version="2.0.0-clean">
       <header style={styles.header}>
         <h1 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '900' }}>🕌 طُمأنينة</h1>
       </header>
 
       <div style={styles.container}>
         
-        {/* 🏠 الشاشة الرئيسية الأصيلة بدون أي أزرار إضافية */}
+        {/* 🏠 الشاشة الرئيسية النظيفة تماماً */}
         {activeTab === 'home' && (
           <div>
             <div style={{ ...styles.card, textAlign: 'center', background: `linear-gradient(135deg, ${colors.primary}, #2c6b57)`, color: colors.white, padding: '40px 20px' }}>
@@ -85,7 +83,7 @@ function App() {
           </div>
         )}
 
-        {/* 📿 شاشة السبحة الإلكترونية الثلاثية */}
+        {/* 📿 شاشة السبحة الإلكترونية الأصيلة */}
         {activeTab === 'tasbeeh' && (
           <div>
             <div style={styles.card}>
@@ -147,7 +145,7 @@ function App() {
 
       </div>
 
-      {/* 🧭 شريط التنقل السفلي الأصلي المريح (الرئيسية - السبحة - الأذكار) */}
+      {/* 🧭 شريط التنقل السفلي الأصلي (3 أزرار فقط) */}
       <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: colors.cardBg, display: 'flex', justifyContent: 'space-around', padding: '12px 0', borderTop: `1px solid ${colors.border}`, zIndex: 1000 }}>
         <button style={{ background: 'none', border: 'none', color: activeTab === 'home' ? colors.primary : colors.subText, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'inherit', fontWeight: 'bold', fontSize: '1rem' }} onClick={() => setActiveTab('home')}><span>🏠</span>الرئيسية</button>
         <button style={{ background: 'none', border: 'none', color: activeTab === 'tasbeeh' ? colors.primary : colors.subText, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'inherit', fontWeight: 'bold', fontSize: '1rem' }} onClick={() => setActiveTab('tasbeeh')}><span>📿</span>السبحة</button>
